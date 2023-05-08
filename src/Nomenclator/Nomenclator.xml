@@ -81,17 +81,25 @@
 		{
 			// Change '/' character for '\' in Windows
 			set st = ##class(%File).CopyFile(tFileName,..UnknownsPath_"/"_$piece(tFileName,"/",*))
-			$$$TRACE(st)
 			if ('st)
 			{
 				$$$TRACE("Error copying file")
 			}
 		}
+		$$$TRACE("Processing "_$piece(tFileName,"/",*))
+
 		Set test = ..Checker()
 		
 		// Change '/' character for '\' in Windows
 		set st = ##class(%File).Delete(..UnknownsPath_"/"_$piece(tFileName,"/",*))
-		$$$TRACE(test)
+		if (test '= "")
+		{
+			$$$TRACE(test)
+		}
+		else
+		{
+			$$$TRACE("No match for "_$piece(tFileName,"/",*))
+		}
 	}
 	catch ex {
 		set status = ex.AsStatus()
@@ -216,43 +224,39 @@
 		distancias = np.array(distancias)
 		return distancias, list(distancias<=umbral)
 	
-	isMatch = 'No matches for '+name
+	isMatch = ''
 	
-	for file in os.listdir(DIR_KNOWNS):	
-		#directoryToCheck = os.path.join(DIR_KNOWNS, file)
-		#if os.path.isdir(directoryToCheck):				
-			# Embeddings reference
-			known_embeddings = []
-			for name in os.listdir(DIR_KNOWNS):
-				if name.endswith('.jpg'):
-					image = load_image(DIR_KNOWNS,name)
-					bboxes = detect_faces(image)					
-					face = extract_faces(image,bboxes)
-					if len(face) > 0 :
-						known_embeddings.append(compute_embedding(facenet,face[0]))				
+	# Embeddings reference
+	known_embeddings = []
+	for name in os.listdir(DIR_KNOWNS):
+		if name.endswith('.jpg'):
+			image = load_image(DIR_KNOWNS,name)
+			bboxes = detect_faces(image)					
+			face = extract_faces(image,bboxes)
+			if len(face) > 0 :
+				known_embeddings.append(compute_embedding(facenet,face[0]))				
 					
-			# Searching matches for knowns faces		
-			for name in os.listdir(DIR_UNKNOWNS):
-				if name.endswith('.jpg'):
-					image = load_image(DIR_UNKNOWNS,name)
-					bboxes = detect_faces(image)
-					faces = extract_faces(image,bboxes)
-        
-					# Computing embedding for each face
-					img_with_boxes = image.copy()
-					for face, box in zip(faces,bboxes):
-						emb = compute_embedding(facenet,face)
+	# Searching matches for knowns faces		
+	for name in os.listdir(DIR_UNKNOWNS):
+		if name.endswith('.jpg'):
+			image = load_image(DIR_UNKNOWNS,name)
+			bboxes = detect_faces(image)
+			faces = extract_faces(image,bboxes)
+      
+			# Computing embedding for each face
+			img_with_boxes = image.copy()
+			for face, box in zip(faces,bboxes):
+				emb = compute_embedding(facenet,face)
 
-						puntuacion, reconocimiento = compare_faces(known_embeddings,emb)
+				puntuacion, reconocimiento = compare_faces(known_embeddings,emb)
 
-						# isMatch = isMatch +'\n'+ ' '.join([str(elem) for elem in puntuacion]) 
-						if any(reconocimiento):							
-							isMatch = isMatch + ' ' + name + ' match!'
-							img_with_boxes = draw_box(img_with_boxes,box,(0,255,0))
-						else:
-							img_with_boxes = draw_box(img_with_boxes,box,(255,0,0))
+				if any(reconocimiento):							
+					isMatch = isMatch + ' ' + name + ' match!'
+					img_with_boxes = draw_box(img_with_boxes,box,(0,255,0))
+				else:
+					img_with_boxes = draw_box(img_with_boxes,box,(255,0,0))
             
-					cv2.imwrite(f'{DIR_RESULTS}/{name}',cv2.cvtColor(img_with_boxes,cv2.COLOR_RGB2BGR))
+			cv2.imwrite(f'{DIR_RESULTS}/{name}',cv2.cvtColor(img_with_boxes,cv2.COLOR_RGB2BGR))
 	
 	return isMatch
 ]]></Implementation>
