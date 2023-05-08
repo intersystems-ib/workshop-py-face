@@ -46,9 +46,8 @@ Automatically an IRIS instance will be deployed and a production will be configu
     * ResultsPath: in this folder we are going to create a copy of the original image with a mark around any face found out. In case of match with any other face the mark will be of green color, otherwise the color will be red. 
     * ModelDetectorFilePath: location in the container of `mobilenet_graph.pb` file.
     * ModelRecognitionFilePath: location in the container of `facenet_keras_weights.h5` file.
-* Try to insert a new record into Patient table (you can do it from Adminer), you will see a new message received in the production.
 
-Opening Visual Studio Code you will be able to manage the different folders configured, you will be able to copy jpg images from your own computer into the container the business operation used to read the object created for each row in Patient's table and the object definition
+Opening Visual Studio Code you will be able to manage the different folders configured, you will be able to copy jpg images from your own computer into the container folder `/shared/knowns` for all the knowns pictures and `/shared/JPG` for all the pictures that we want identify.
 
 ## Python Method
 If you are interested in know more about the Python functionality you can take a look to [this article](https://www.codificandobits.com/blog/tutorial-reconocimiento-facial-python/) in spanish that I used to build the entire functionality.
