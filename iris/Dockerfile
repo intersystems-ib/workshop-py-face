@@ -1,4 +1,4 @@
-ARG IMAGE=containers.intersystems.com/intersystems/iris-community:2023.1.0.229.0
+ARG IMAGE=containers.intersystems.com/intersystems/iris-community:latest-cd
 FROM $IMAGE
 
 USER root
@@ -31,19 +31,10 @@ SHELL ["/irissession.sh"]
 
 RUN \
   zn "USER" \
-  # do ##class(Ens.Config.Credentials).SetCredential("MySQL_User","root","SYS") \
-  # load & compile source code
   set sc = $SYSTEM.OBJ.LoadDir("/opt/irisapp/src/Installer", "ck", , 1) \
   if sc do ##class(Nomenclator.Installer).Install() \
   zn "NOMENCLATOR" \
   set sc = $SYSTEM.OBJ.LoadDir("/opt/irisapp/src/Nomenclator", "ck", , 1) \
-  # do ##class(%File).RemoveDirectoryTree("/tmp") \
-  # start production
   set production = "Nomenclator.Production" \
   set ^Ens.Configuration("csp","LastProduction") = production \
   do ##class(Ens.Director).SetAutoStart(production)
-  
-# run iris.script
-# RUN iris start IRIS \
-#   && iris session IRIS < /opt/irisapp/iris.script \
-#   && iris stop IRIS quietly
